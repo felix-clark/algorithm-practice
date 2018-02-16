@@ -1,13 +1,11 @@
 module SortSpec where
 
-import Sort
 import Test.Hspec
+import Sort
 
--- main :: IO ()
--- main = hspec $ do
 spec :: Spec
 spec = do
-  describe "sort algorithms" $ do
+  describe "sorting algorithms" $ do
     it "succeeds if all the sorting algorithms properly sort all of the testing lists" $
       all isSorted sortedLists `shouldBe` True where
       -- GHC doesn't yet support "impredicative polymorphism" so we have to specify the type of the functions

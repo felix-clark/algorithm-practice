@@ -97,6 +97,12 @@ instance Eq a => Eq (LinkedList a) where
   (Cons x xs) == (Cons y ys) = x == y && xs == ys
   _ == _ = False
 
+-- we'll implement "show" a little differently than normal lists, for fun
+instance Show a => Show (LinkedList a) where
+  show Nil = ""
+  show (Cons x Nil) = show x
+  show (Cons x xs) = show x ++ " - " ++ show xs
+
 instance Monoid (LinkedList a) where
   mempty = Nil
   mappend (Cons x xs) ys = Cons x (mappend xs ys)

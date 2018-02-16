@@ -7,7 +7,7 @@ main :: IO ()
 main = do
 
   -- GHC doesn't yet support "impredicative polymorphism" so we have to specify the type of the functions
-  let funcsToTest = [mergeSort, quickSort, insertionSort, bubbleSort] :: [[Integer] -> [Integer]]
+  let funcsToTest = [mergeSort, quickSort, selectionSort, insertionSort, bubbleSort] :: [[Integer] -> [Integer]]
 
   let testLists = [ [],
                     [0],

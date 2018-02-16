@@ -10,10 +10,8 @@ import Data.List (partition, insert)
 
 -- test whether a list is sorted with a single pass-through. O(n) time complexity
 isSorted :: Ord a => [a] -> Bool
-isSorted [] = True
-isSorted [_] = True
-isSorted (x:xs) = (x <= head xs) && (isSorted xs)
-
+isSorted (x:y:xs) = (x <= y) && (isSorted (y:xs))
+isSorted _ = True -- lists of 0 or 1 elements are sorted
 
 -- with a functional programming approach, many of these algorithms will not exactly be optimal, especially in space complexity.
 -- C sorting algorithms often make heavy use of swap, which is not so pretty in a lazy context.
@@ -23,8 +21,9 @@ mergeSort :: Ord a => [a] -> [a]
 mergeSort [] = []
 mergeSort [x] = [x]
 mergeSort xs = mergeSorted (mergeSort front) (mergeSort back) where
-  (front,back) = splitAt n xs
-  n = (length xs) `div` 2
+  (front,back) = splitAt (length xs `div` 2) xs
+  mergeSorted :: Ord a => [a] -> [a] -> [a]
+  -- mergeSorted [] = id
   mergeSorted [] bs = bs
   mergeSorted as [] = as
   mergeSorted (a:as) (b:bs)
@@ -59,31 +58,44 @@ quickSortPivotHead (p:xs) = quickSort lt ++ [p] ++ quickSort gte where
 quickSortPivotLast :: Ord a => [a] -> [a]
 quickSortPivotLast [] = []
 quickSortPivotLast ls = quickSort lt ++ [p] ++ quickSort gte where
-  p = last ls
-  xs = init ls
-  -- (xs,[p]) = splitAt ((length ls) - 1) ls -- does this pattern matching work?
+  (xs,[p]) = splitAt (length ls - 1) ls
   (lt,gte) = partition (< p) xs
 
 -- this version of quicksort uses the middle element for a pivot
 quickSortPivotMiddle :: Ord a => [a] -> [a]
 quickSortPivotMiddle [] = []
 quickSortPivotMiddle ls = quickSort lt ++ [p] ++ quickSort gte where
-  (front,(p:back)) = splitAt ((length ls) `div` 2) ls
+  (front,(p:back)) = splitAt (length ls `div` 2) ls
   (lt,gte) = partition (< p) (front ++ back)
 
 
 -- selection sort is probably the most naive sorting algorithm.
 -- it works well for short and nearly-sorted lists, but usually worse than insertion sort
 selectionSort :: Ord a => [a] -> [a]
-selectionSort [] = []
+selectionSort = undefined
 
 -- insertion sort is a decent simple choice for small lists
 insertionSort :: Ord a => [a] -> [a]
--- insertionSort [] = []
 insertionSort = foldr insert []
 -- this feels like cheating, so let's write our own version of insert to show what's going on
 
--- bubble sort is really not great. n^2 complexity, and worse than insertion and selection.
+-- bubble sort is usually not great. n^2 complexity, and worse than insertion and selection.
 -- the one context it enjoys an advantage in is when the list is already nearly sorted.
 bubbleSort :: Ord a => [a] -> [a]
-bubbleSort [] = []
+bubbleSort ls = if flips == 0 then possSort else bubbleSort possSort where
+  (possSort,flips) = iterBubble ls 0
+  iterBubble :: Ord a => [a] -> Int -> ([a],Int)
+  iterBubble (x:y:xs) flips
+    | x <= y    = let (possSorted,flips') = iterBubble (y:xs) flips
+                  in (x:possSorted,flips')
+    | otherwise = let (possSorted,flips') = iterBubble (x:xs) flips
+                  in (y:possSorted,succ flips')
+  iterBubble x flips = (x,flips)
+-- the iterative part of this method returns a tuple of the list and a count of flips.
+-- it should be better to keep track of whether any flips have occurred as opposed to e.g. checking whether it is sorted every time (which might actually make it O(n^3)??) like so:
+-- bubbleSort' (x:y:xs) = if isSorted possSort then possSort else bubbleSort possSort
+--   where possSort
+--           | x <= y    = x:(bubbleSort (y:xs))
+--           | otherwise = y:(bubbleSort (x:xs))
+-- bubbleSort' x = x
+    

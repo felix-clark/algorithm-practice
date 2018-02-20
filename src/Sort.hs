@@ -2,6 +2,7 @@ module Sort
   (  isSorted,
      mergeSort,
      quickSort,
+     heapSort,
      bubbleSort,
      selectionSort,
      insertionSort,
@@ -10,6 +11,7 @@ module Sort
 -- allow built-in structures and functions only (no external packages), like (linked) lists.
 -- these are (at time of writing) all simple O(n) functions.
 import Data.List (partition, delete, insert)
+import qualified MaxHeap
 
 -- test whether a list is sorted with a single pass-through. O(n) time complexity
 isSorted :: Ord a => [a] -> Bool
@@ -30,7 +32,6 @@ mergeSort [x] = [x]
 mergeSort xs = mergeSorted (mergeSort front) (mergeSort back) where
   (front,back) = splitAt (length xs `div` 2) xs
   mergeSorted :: Ord a => [a] -> [a] -> [a]
-  -- mergeSorted [] = id
   mergeSorted [] bs = bs
   mergeSorted as [] = as
   mergeSorted (a:as) (b:bs)
@@ -59,29 +60,29 @@ quickSort = quickSortPivotHead
 --   in quickSortChoice x
 
 -- this version of quicksort always uses the head as the pivot. easiest to write on its own, but will refer back to the generic quicksort.
--- if we knew the data is random, using this version recursively would be the best choice, since random access in haskell is O(n) not O(1).
+-- if we knew the data is random, using this version recursively would be the best choice, since random access on a linked list is O(n) not O(1).
 quickSortPivotHead :: Ord a => [a] -> [a]
 quickSortPivotHead [] = []
-quickSortPivotHead (p:xs) = quickSort lt ++ [p] ++ quickSort gte where
-  (lt,gte) = quickSort <$> partition (< p) xs
+quickSortPivotHead (p:xs) = quickSort lt ++ p : quickSort gte where
+  (lt,gte) = partition (< p) xs
 
 -- this version of quicksort always uses the last element as the pivot
 quickSortPivotLast :: Ord a => [a] -> [a]
 quickSortPivotLast [] = []
-quickSortPivotLast ls = quickSort lt ++ [p] ++ quickSort gte where
+quickSortPivotLast ls = quickSort lt ++ p : quickSort gte where
   (xs,[p]) = splitAt (length ls - 1) ls
   (lt,gte) = partition (< p) xs
 
 -- this version of quicksort uses the middle element for a pivot
 quickSortPivotMiddle :: Ord a => [a] -> [a]
 quickSortPivotMiddle [] = []
-quickSortPivotMiddle ls = quickSort lt ++ [p] ++ quickSort gte where
+quickSortPivotMiddle ls = quickSort lt ++ p : quickSort gte where
   (front,(p:back)) = splitAt (length ls `div` 2) ls
   (lt,gte) = partition (< p) (front ++ back)
 
 -- come back to this once we implement an ordered heap
 heapSort :: Ord a => [a] -> [a]
-heapSort = undefined
+heapSort = MaxHeap.toList . MaxHeap.fromList
 
 -- this is a fast overall sort that uses quicksort until some optimal depth then switches to heapsort.
 -- it is used in many STL implementations. note that neither quicksort or heapsort are stable.
@@ -92,14 +93,20 @@ introSort = undefined
 -- it works decently enough for short and nearly-sorted lists, but usually worse than insertion sort.
 selectionSort :: Ord a => [a] -> [a]
 selectionSort [] = []
-selectionSort ls = x:(selectionSort xs) where
+selectionSort ls = x : selectionSort xs where
   x = minimum ls
   xs = delete x ls
 
 -- insertion sort is a decent simple choice for small lists
 insertionSort :: Ord a => [a] -> [a]
-insertionSort = foldr insert []
+insertionSort = foldr insert' []
 -- insert takes an element and a list, and returns the list with the element inserted before the first other element that is >= than it.
+-- a hand-written version looks like:
+  where
+    insert' y (x:xs)
+      | y <= x    = (y:x:xs)
+      | otherwise = x : insert' y xs
+    insert' x [] = x:[]
 
 -- bubble sort is usually not great. n^2 complexity, and worse than insertion and selection.
 -- the one context in which it enjoys an advantage is when the list is already nearly sorted.

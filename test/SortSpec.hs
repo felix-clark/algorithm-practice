@@ -11,6 +11,7 @@ spec = do
       -- GHC doesn't yet support "impredicative polymorphism" so we have to specify the type of the functions
       funcsToTest = [mergeSort,
                      quickSort,
+                     heapSort,
                      selectionSort,
                      insertionSort,
                      bubbleSort] :: [[Integer] -> [Integer]]

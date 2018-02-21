@@ -10,6 +10,7 @@ spec = do
       all isSorted sortedLists `shouldBe` True where
       -- GHC doesn't yet support "impredicative polymorphism" so we have to specify the type of the functions
       funcsToTest = [mergeSort,
+                     quickSort',
                      quickSort,
                      heapSort,
                      selectionSort,

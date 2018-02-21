@@ -107,7 +107,7 @@ quickSortVecPivotMiddle x = quickSortVec lt Vec.++ (Vec.cons p (quickSortVec gte
 
 -- converts to and from our max-heap implementation to retrieve a sorted list.
 -- TODO: this might not actually be equivalent to a canonical heapSort. check to understand this.
--- our implementation should still have linearithmic time.
+-- our implementation may still have linearithmic time, but be un-optimized.
 heapSort :: Ord a => [a] -> [a]
 heapSort = MaxHeap.toList . MaxHeap.fromList
 

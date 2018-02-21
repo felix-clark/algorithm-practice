@@ -4,6 +4,7 @@ module Sort
      quickSort',
      quickSort,
      heapSort,
+     heapSort',
      bubbleSort,
      selectionSort,
      insertionSort,
@@ -14,6 +15,7 @@ module Sort
 import Data.List (partition, delete, insert)
 -- import our implementation of MaxHeap for heapsort
 import qualified MaxHeap
+import qualified MinHeap
 -- we will import Data.Vector to use a quicksort version with median-of-three pivot choice
 -- without resorting to compiler intrinsics.
 import qualified Data.Vector as Vec
@@ -104,9 +106,15 @@ quickSortVecPivotMiddle x = quickSortVec lt Vec.++ (Vec.cons p (quickSortVec gte
   (lt,gte) = Vec.unstablePartition (< p) xs
 
 -- converts to and from our max-heap implementation to retrieve a sorted list.
--- a min-heap would also work just as well, i think.
+-- TODO: this might not actually be equivalent to a canonical heapSort. check to understand this.
+-- our implementation should still have linearithmic time.
 heapSort :: Ord a => [a] -> [a]
 heapSort = MaxHeap.toList . MaxHeap.fromList
+
+-- a min-heap might work just as well, i think.
+heapSort' :: Ord a => [a] -> [a]
+heapSort' = MinHeap.toList . MinHeap.fromList
+
 
 -- this is a fast overall sort that uses quicksort until some optimal depth then switches to heapsort.
 -- it is used in many STL implementations. note that neither quicksort or heapsort are stable.
@@ -114,23 +122,31 @@ introSort :: Ord a => [a] -> [a]
 introSort = undefined
 
 -- selection sort is probably the most naive sorting algorithm.
--- it works decently enough for short and nearly-sorted lists, but usually worse than insertion sort.
+-- it works decently enough for short and nearly-sorted lists, but is supposedly worse than insertion sort.
+-- in practice it seems to do well, perhaps since the memory usage is small.
+-- we write our own versions of minimum and delete to ensure a fair comparison
 selectionSort :: Ord a => [a] -> [a]
 selectionSort [] = []
 selectionSort ls = x : selectionSort xs where
-  x = minimum ls
-  xs = delete x ls
-
+  x = minimum' ls
+  xs = delete' x ls
+  minimum' (x:[]) = x
+  minimum' (x:xs) = min x (minimum xs)
+  delete' _ [] = []
+  delete' y (x:xs)
+    | y == x  = xs
+    | otherwise = x : delete' y xs
+  
 -- insertion sort is a decent simple choice for small lists
 insertionSort :: Ord a => [a] -> [a]
-insertionSort = foldr insert' []
+insertionSort = foldr insert []
 -- insert takes an element and a list, and returns the list with the element inserted before the first other element that is >= than it.
 -- a hand-written version looks like:
-  where
-    insert' y (x:xs)
-      | y <= x    = (y:x:xs)
-      | otherwise = x : insert' y xs
-    insert' x [] = x:[]
+  -- where
+  --   insert' y (x:xs)
+  --     | y <= x    = (y:x:xs)
+  --     | otherwise = x : insert' y xs
+  --   insert' x [] = x:[]
 
 -- bubble sort is usually not great. n^2 complexity, and worse than insertion and selection.
 -- the one context in which it enjoys an advantage is when the list is already nearly sorted.

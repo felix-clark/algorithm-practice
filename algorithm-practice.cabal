@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Lib
                      , Sort
+                     , Select
                      , LinkedList
                      , BinarySearchTree
                      , MaxHeap
@@ -43,6 +44,7 @@ test-suite algorithm-practice-test
                      -- hspec can be further used to auto-discover tests for each module, see:
                      -- https://stackoverflow.com/questions/43263965/how-to-run-multiple-test-files-with-haskell-stack-project
   other-modules:       SortSpec
+                     , SelectSpec
                      , LinkedListSpec
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010

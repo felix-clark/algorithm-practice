@@ -11,7 +11,11 @@ module Sort
 -- allow built-in structures and functions only (no external packages), like (linked) lists.
 -- these are (at time of writing) all simple O(n) functions.
 import Data.List (partition, delete, insert)
+-- import our implementation of MaxHeap for heapsort
 import qualified MaxHeap
+-- we will import Data.Vector to use a quicksort version with median-of-three pivot choice
+-- without resorting to compiler intrinsics.
+import qualified Data.Vector as Vec
 
 -- test whether a list is sorted with a single pass-through. O(n) time complexity
 isSorted :: Ord a => [a] -> Bool
@@ -43,44 +47,64 @@ mergeSort xs = mergeSorted (mergeSort front) (mergeSort back) where
 -- could convert to a Vector then sort, but we need to implement that data structure first (or cheat by importing it).
 -- pathological examples could still be constructed to make this version O(n^2)
 -- a random pivot does well on average but we won't introduce that complexity.
+
+-- this version always uses the head as pivot.
+-- it will do poorly in already-sorted lists but has a simple implementation
+-- and avoids random-access of the linked list.
+quickSort' :: Ord a => [a] -> [a]
+quickSort' [] = []
+quickSort' (p:xs) = quickSort lt ++ p : quickSort gte where
+  (lt,gte) = partition (< p) xs
+  
+-- this version converts to a Data.Vector, which has O(1) random access.
 quickSort :: Ord a => [a] -> [a]
-quickSort = quickSortPivotHead
--- the below is included for visibility but is not efficient on linked lists. re-visit this with Vector
--- quickSort [] = []
--- quickSort x = let
---   h = head x
---   m = x !! ((length x) `div` 2)
---   l = last x
---   -- prefer head pivot, then last pivot, then middle. not sure which way middle/last matters
---   quickSortChoice = if (m <= h && h <= l) || (l <= h && h <= m)
---                     then quickSortPivotHead
---                     else if (h <= l && l <= m) || (m <= l && l <= h)
---                          then quickSortPivotLast
---                          else quickSortPivotMiddle
---   in quickSortChoice x
+quickSort [] = []
+quickSort x = let
+  vecx = Vec.fromList x -- O(n) conversion
+  in Vec.toList $ quickSortVec x
+
+quickSortVec :: Ord a => Vec.Vector a -> Vec.Vector a
+quickSortVec x = let
+  h = Vec.head x
+  m = vecx !! ((Vec.length x) `div` 2)
+  l = last x
+  -- prefer head pivot, then last pivot, then middle. not sure which way middle/last matters
+  quickSortChoice = if (m <= h && h <= l) || (l <= h && h <= m)
+                    then quickSortVecPivotHead
+                    else if (h <= l && l <= m) || (m <= l && l <= h)
+                         then quickSortVecPivotLast
+                         else quickSortVecPivotMiddle
+    -- where
+    --   quickSortPivotHead [] = []
+    --   quickSortPivotHead (p:xs) = quickSort lt ++ p : quickSort gte where
+    --     (lt,gte) = partition (< p) xs
+  in Vec.toList $ quickSortChoice x
 
 -- this version of quicksort always uses the head as the pivot. easiest to write on its own, but will refer back to the generic quicksort.
 -- if we knew the data is random, using this version recursively would be the best choice, since random access on a linked list is O(n) not O(1).
-quickSortPivotHead :: Ord a => [a] -> [a]
-quickSortPivotHead [] = []
-quickSortPivotHead (p:xs) = quickSort lt ++ p : quickSort gte where
-  (lt,gte) = partition (< p) xs
+quickSortVecPivotHead :: Ord a => Vec.Vector a -> Vec.Vector a
+quickSortVecPivotHead x
+  | Vec.null x   = Vec.empty
+  | otherwise    = quickSort lt ++ (cons p (quickSort gte)) where
+quickSortVecPivotHead (p:xs) = quickSort lt ++ (cons p (quickSort gte)) where
+  (lt,gte) = Vec.unstablePartition (< p) xs
 
 -- this version of quicksort always uses the last element as the pivot
-quickSortPivotLast :: Ord a => [a] -> [a]
-quickSortPivotLast [] = []
-quickSortPivotLast ls = quickSort lt ++ p : quickSort gte where
-  (xs,[p]) = splitAt (length ls - 1) ls
-  (lt,gte) = partition (< p) xs
+quickSortVecPivotLast :: Ord a => Vec.Vector a -> Vec.Vector a
+quickSortVecPivotLast Vec.empty = Vec.empty
+quickSortVecPivotLast ls = quickSort lt ++ p : quickSort gte where
+  (xs,[p]) = Vec.splitAt (length ls - 1) ls
+  (lt,gte) = Vec.unstablePartition (< p) xs
 
 -- this version of quicksort uses the middle element for a pivot
-quickSortPivotMiddle :: Ord a => [a] -> [a]
-quickSortPivotMiddle [] = []
-quickSortPivotMiddle ls = quickSort lt ++ p : quickSort gte where
-  (front,(p:back)) = splitAt (length ls `div` 2) ls
-  (lt,gte) = partition (< p) (front ++ back)
+quickSortVecPivotMiddle :: Ord a => Vec.Vector a -> Vec.Vector a
+quickSortVecPivotMiddle Vec.empty = Vec.empty
+quickSortVecPivotMiddle ls = quickSort lt ++ p : quickSort gte where
+  (front,(p:back)) = Vec.splitAt (length ls `div` 2) ls
+  (lt,gte) = Vec.unstablePartition (< p) (front ++ back)
 
--- come back to this once we implement an ordered heap
+-- converts to and from our max-heap implementation to retrieve a sorted list.
+-- a min-heap would also work just as well, i think.
 heapSort :: Ord a => [a] -> [a]
 heapSort = MaxHeap.toList . MaxHeap.fromList
 

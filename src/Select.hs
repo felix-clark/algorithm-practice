@@ -27,7 +27,7 @@ quickSelectR = undefined
 -- guaranteed to not be in the top or bottom quartiles (a little better: middle ~40% for sufficiently long inputs)
 medianOfMedians :: Ord a => [a] -> a
 medianOfMedians [] = error "cannot find median of empty list"
-medianOfMedians x = quickSelect' (length medianList `div` 2) medianList
+medianOfMedians x = quickSelect' ((length medianList - 1 ) `div` 2) medianList
   where
     medianList = getMedians x
     getMedians [] = []
@@ -35,7 +35,7 @@ medianOfMedians x = quickSelect' (length medianList `div` 2) medianList
       where
         (front,back) = splitAt 5 x
         medianOfSmall [] = error "shouldn't be here"
-        medianOfSmall x = quickSelect (length x `div` 2) x -- something simple like insertion sort then 2nd element might be preferable
+        medianOfSmall x = quickSelect ((length x - 1) `div` 2) x -- something simple like insertion sort then 2nd element might be preferable
       
 
 -- we can use the O(n) median-of-medians algorithm to write a quick-select algorithm with worst case O(n).

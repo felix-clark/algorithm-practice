@@ -3,7 +3,7 @@ module Select where
 -- selection algorithms to return the ith-smallest element of a list
 
 -- partition-based selection like quicksort.
--- good average performance (O(n)) but poor worst-case (O(n^2) like quicksort).
+-- O(n) average performance but poor worst-case (O(n^2) like quicksort).
 -- using pivot at head results in O(n^2) performance for already-sorted lists.
 quickSelect :: Ord a => Int -> [a] -> a
 quickSelect i (p:xs)
@@ -21,3 +21,16 @@ quickSelect i (p:xs)
 -- this case should not fire unless i > length input
 quickSelect _ [] = error "order index out of range"
 
+
+-- O(n) algorithm for finding *approximate* median.
+-- guaranteed to not be in the top or bottom quartiles (a little better actually)
+medianOfMedians :: Ord a -> [a] -> a
+medianOfMedians x = let
+  n = length x -- would be nice to not incur this additional O(n) operation
+  medianOfFive = quickSelect 2 -- something simple like insertion sort then 2nd element might be preferable
+  in
+    undefined
+medianOfMedians [] = error "cannot find median of empty list"
+
+
+-- we can use the O(n) median-of-medians algorithm to write a quick-select algorithm with worst case O(n). It will not actually be faster in practice, except for extraordinarily long lists.

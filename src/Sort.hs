@@ -60,9 +60,9 @@ quickSort [] = []
 quickSort (p:xs) = quickSort lt ++ p : quickSort gte where
   (lt,gte) = partition (< p) xs
 
--- quicksort with a random pivot. has expected linearithmic time for any data set.
+-- quicksort with a random pivot. has *expected* linearithmic time for *any* data set.
 -- getting random numbers has some overhead though, so let's test.
-quickSortR :: Ord a => [a] -> [a]
+quickSortR :: Ord a, MonadRandom m => [a] -> m [a]
 quickSortR = undefined
   
 -- this version converts to a Data.Vector, which has O(1) random access.

@@ -12,6 +12,7 @@ main = do
                      ,("quicksort (vector conversion to median-of-3)",quickSort')
                      ,("heapsort (max heap)",heapSort)
                      ,("heapsort (min heap)",heapSort')
+                     ,("treesort",treeSort)
                      ,("selection sort",selectionSort)
                      ,("insertion sort",insertionSort)
                      ,("bubble sort",bubbleSort)
@@ -24,6 +25,7 @@ main = do
   -- nf: normal form - forces evaluation ahead of time.
   -- whnf: weak head normal form - doesn't seem to give realistic benchmarks for sorts, e.g. it say selection sort is very fast
   -- it might be instructive in some cases to check both
+  -- should consider organize by sorting algorithms rather than targets
   defaultMain [ bgroup "singleton" [ bench desc $ nf sf singleton | (desc,sf) <- descAndFuncs ]
               , bgroup "sorted 10k" [ bench desc $ nf sf sorted10k | (desc,sf) <- descAndFuncs ]
               , bgroup "reverse 1k" [ bench desc $ nf sf reverse1k | (desc,sf) <- descAndFuncs ]

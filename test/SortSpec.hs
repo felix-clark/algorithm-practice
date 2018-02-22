@@ -10,6 +10,7 @@ funcsToTest = [mergeSort
               ,quickSort'
               ,heapSort
               ,heapSort'
+              ,treeSort
               ,selectionSort
               ,insertionSort
               ,bubbleSort

@@ -5,6 +5,7 @@ module Sort
      quickSort,
      heapSort,
      heapSort',
+     treeSort,
      bubbleSort,
      selectionSort,
      insertionSort,
@@ -16,6 +17,7 @@ import Data.List (partition, delete, insert)
 -- import our implementation of MaxHeap for heapsort
 import qualified MaxHeap
 import qualified MinHeap
+import qualified BinarySearchTree as BST
 -- we will import Data.Vector to use a quicksort version with median-of-three pivot choice
 -- without resorting to compiler intrinsics.
 import qualified Data.Vector as Vec
@@ -57,6 +59,11 @@ quickSort :: Ord a => [a] -> [a]
 quickSort [] = []
 quickSort (p:xs) = quickSort lt ++ p : quickSort gte where
   (lt,gte) = partition (< p) xs
+
+-- quicksort with a random pivot. has expected linearithmic time for any data set.
+-- getting random numbers has some overhead though, so let's test.
+quickSortR :: Ord a => [a] -> [a]
+quickSortR = undefined
   
 -- this version converts to a Data.Vector, which has O(1) random access.
 -- this lets us use a median-of-three pivot without increasing the order of the time complexity.
@@ -115,11 +122,11 @@ heapSort = MaxHeap.toList . MaxHeap.fromList
 heapSort' :: Ord a => [a] -> [a]
 heapSort' = MinHeap.toList . MinHeap.fromList
 
-
--- this is a fast overall sort that uses quicksort until some optimal depth then switches to heapsort.
--- it is used in many STL implementations. note that neither quicksort or heapsort are stable.
-introSort :: Ord a => [a] -> [a]
-introSort = undefined
+-- this builds a binary search tree then converts to a sorted list.
+-- it is similar to quicksort, tho does require the tree allocation.
+-- comparing this to quicksort should be indicative of the additional cost of allocating a heap in our implementation of heapsort rather than using arrays.
+treeSort :: Ord a => [a] -> [a]
+treeSort = BST.toList . BST.fromList
 
 -- selection sort is probably the most naive sorting algorithm.
 -- it works decently enough for short and nearly-sorted lists, but is supposedly worse than insertion sort.

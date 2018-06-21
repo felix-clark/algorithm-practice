@@ -1,6 +1,11 @@
 -- this module should be imported qualified
 module MinHeap where
 
+-- Note: this is NOT a complete min-heap, just enough to sort a list.
+-- we need methods to insert a single element and remove only the min element.
+-- these need bubble-up and bubble-down operations.
+-- performant implementations typically use arrays.
+
 -- this could be made a generic heap by adding an additional parameter that is either GT or LT to indicate Max/Min heaps
 -- the integer is the rank of the heap (no. of elements) for efficient heap construction
 data MinHeap a = Nil
